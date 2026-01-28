@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NDMR | Pre-order Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <style>
+        body { background-color: #030303; color: #00ff41; font-family: 'Space Mono', monospace; overflow-x: hidden; }
+        
+        /* FIX FOR SAFARI BLUR ERROR */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.8);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        input, select {
+            background: #000 !important;
+            border: 1px solid #00ff41 !important;
+            color: #fff !important;
+            padding: 12px;
+            width: 100%;
+            outline: none;
+            font-size: 13px;
+        }
+
+        input:focus { border-color: #ffffff !important; }
+
+        .scanline {
+            width: 100%; height: 2px; background: rgba(0, 255, 65, 0.05);
+            position: absolute; animation: scan 8s linear infinite; top: 0;
+        }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+    </style>
+</head>
+<body class="p-6 md:p-16 min-h-screen flex items-center justify-center">
+    <div class="scanline"></div>
+
+    <div class="max-w-xl w-full glass-panel p-8 md:p-10 rounded shadow-2xl z-10">
+        <header class="mb-10 border-b border-green-900/50 pb-6">
+            <h1 class="text-4xl font-black italic tracking-tighter text-white">NDMR.</h1>
+            <p class="text-[10px] opacity-50 uppercase tracking-[0.2em] mt-2">Professional Pre-order Service // Chișinău</p>
+        </header>
+
+        <form id="preorder-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-[9px] uppercase tracking-widest opacity-40">Client_Name</label>
+                    <input type="text" name="user_name" id="user_name" required placeholder="Ion Popescu">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[9px] uppercase tracking-widest opacity-40">Contact_Email</label>
+                    <input type="email" name="user_email" id="user_email" required placeholder="contact@domain.md">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[9px] uppercase tracking-widest opacity-40">Device_Selection</label>
+                <select name="tier" id="tier" required>
+                    <option value="Standard">ARDOFONE Standard (500 MDL)</option>
+                    <option value="Pro">ARDOFONE PRO (1000 MDL)</option>
+                </select>
+            </div>
+
+            <div class="pt-6">
+                <button type="submit" id="submit-btn" class="w-full bg-[#00ff41] text-black font-black py-4 uppercase text-xs tracking-[0.3em] hover:bg-white transition-all active:scale-95">
+                    INITIATE_SERVICE
+                </button>
+            </div>
+
+            <p class="text-[8px] text-center opacity-30 mt-4 uppercase">
+                Confirmation email via Mailjet Protocol will be dispatched upon submission.
+            </p>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        // 1. INITIALIZE EMAILJS
+        (function() {
+            emailjs.init("16f921d24de201f20f34d9a1ccf53208"); // Replace with your Public Key from EmailJS Account
+        })();
+
+        const form = document.getElementById('preorder-form');
+        const btn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            btn.innerText = "TRANSMITTING...";
+            btn.disabled = true;
+
+            const tier = document.getElementById('tier').value;
+            const price = (tier === "Pro") ? "1000 MDL" : "500 MDL";
+
+            // 2. DATA FOR YOUR MAILJET TEMPLATE
+            const templateParams = {
+                user_name: document.getElementById('user_name').value,
+                user_email: document.getElementById('user_email').value,
+                tier: tier,
+                price: price
+            };
+
+            // 3. SEND THE EMAIL
+            emailjs.send('service_1irdxaz', 'template_86c5088', templateParams)
+                .then(function() {
+                    btn.innerText = "PROTOCOL SUCCESS";
+                    btn.style.backgroundColor = "#ffffff";
+                    alert("NDMR: Pre-order logged. Check your email for pickup instructions.");
+                    form.reset();
+                }, function(error) {
+                    btn.innerText = "ERROR - RETRY";
+                    btn.disabled = false;
+                    alert("Service Error. Check your connection.");
+                    console.error('FAILED...', error);
+                });
+        });
+    </script>
+</body>
+</html>
